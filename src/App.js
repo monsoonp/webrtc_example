@@ -2,24 +2,19 @@ import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import Screen from "./components/screen";
+// import socketClient from "socket.io-client";
 
+// package.json
+// mac - HTTPS=true
+// windows - set HTTPS=true&&
 function App() {
+  // const socket = socketClient("/");
+
   return (
     <div className="App">
-      <Screen />
       <header className="App-header">
+        <Screen /> {/* socket={socket} */}
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
     </div>
   );
