@@ -1,4 +1,8 @@
 import React, { Fragment, useEffect, useState, useRef } from "react"; //useEffect, useState
+// import { getDesktop } from "./desktopCapture";
+const electron = window.require("electron");
+const desktopCapturer = electron.desktopCapturer;
+
 // import ReactPlayer from "react-player";
 // import Player from "video-react";
 
@@ -78,13 +82,50 @@ const Screen = ({ socket }) => {
     },
   };
   const getDisplay = async (cb) => {
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: displayConstraints.video,
-      audio: displayConstraints.audio,
-    });
-    const videoTrack = stream.getVideoTracks();
-    console.log(videoTrack);
+    const stream = await window.navigator.mediaDevices
+      .getDisplayMedia({
+        video: displayConstraints.video,
+        audio: displayConstraints.audio,
+      })
+      .catch(async () => {
+        // cb(getDesktop());
+        alert("Couldn't get Screen");
+      });
+    // const videoTrack = stream.getVideoTracks();
+    // console.log(videoTrack);
     cb(stream);
+  };
+  const getDesktop = () => {
+    desktopCapturer
+      .getSources({ types: ["window", "screen"] })
+      .then(async (sources) => {
+        for (const src of sources) {
+          if (src.name === "Electron" || src.name === "Entire Screen") {
+            try {
+              const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                  mandatory: {
+                    chromeMediaSource: "desktop",
+                    chromeMediaSourceId: src.id,
+                    minWidth: 1280,
+                    maxWidth: 1280,
+                    minHeight: 720,
+                    maxHeight: 720,
+                  },
+                },
+                audio: false,
+              });
+              return stream;
+              //   setSource(stream);
+              //   tag.current.srcObject = stream;
+              // handleStream(stream);
+            } catch (e) {
+              console.log(e);
+            }
+            // return;
+          }
+        }
+      });
   };
   const getScreen = () => {
     if (source) stop();
@@ -93,8 +134,11 @@ const Screen = ({ socket }) => {
     getDisplay((stream) => {
       // const video = document.querySelector("video");
       // video.srcObject = stream;
-      setSource(stream);
-      videoTag.current.srcObject = stream;
+      console.log("screen stream:", stream);
+      if (stream) {
+        setSource(stream);
+        videoTag.current.srcObject = stream;
+      }
       // setSource(true);
     });
   };
