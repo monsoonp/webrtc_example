@@ -82,27 +82,28 @@ const Screen = ({ socket }) => {
     },
   };
   const getDisplay = async (cb) => {
-    const stream = await window.navigator.mediaDevices
+    const stream = await navigator.mediaDevices
       .getDisplayMedia({
         video: displayConstraints.video,
         audio: displayConstraints.audio,
       })
       .catch(async () => {
-        // cb(getDesktop());
-        alert("Couldn't get Screen");
+        getDesktop(cb);
+        // alert("Couldn't get Screen");
       });
     // const videoTrack = stream.getVideoTracks();
     // console.log(videoTrack);
     cb(stream);
   };
-  const getDesktop = () => {
+  const getDesktop = (cb) => {
     desktopCapturer
       .getSources({ types: ["window", "screen"] })
       .then(async (sources) => {
         for (const src of sources) {
+          console.log(src);
           if (src.name === "Electron" || src.name === "Entire Screen") {
             try {
-              const stream = await navigator.mediaDevices.getDisplayMedia({
+              const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                   mandatory: {
                     chromeMediaSource: "desktop",
@@ -115,7 +116,7 @@ const Screen = ({ socket }) => {
                 },
                 audio: false,
               });
-              return stream;
+              cb(stream);
               //   setSource(stream);
               //   tag.current.srcObject = stream;
               // handleStream(stream);
