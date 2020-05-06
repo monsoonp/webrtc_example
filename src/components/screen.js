@@ -9,6 +9,7 @@ const desktopCapturer = electron.desktopCapturer;
 const Screen = ({ socket }) => {
   const [source, setSource] = useState(false);
   const [location, setLocation] = useState(false);
+  const [count, setCount] = useState(0);
   const videoTag = useRef();
 
   const getScreenStream = async (callback) => {
@@ -99,9 +100,11 @@ const Screen = ({ socket }) => {
     desktopCapturer
       .getSources({ types: ["window", "screen"] })
       .then(async (sources) => {
-        for (const src of sources) {
+        // for (const src of sources) {
+        for (const [idx, src] of sources.entries()) {
           console.log(src);
-          if (src.name === "Electron" || src.name === "Entire Screen") {
+          // if (src.name === "Electron" || src.name === "Entire Screen") {
+          if (idx === count) {
             try {
               const stream = await navigator.mediaDevices.getUserMedia({
                 video: {
@@ -218,6 +221,13 @@ const Screen = ({ socket }) => {
             ({location.coords.latitude}, {location.coords.longitude})
           </p>
         )}
+        <input
+          onChange={(e) => {
+            setCount(parseInt(e.target.value));
+          }}
+          value={count}
+          placeholder="select screen number"
+        />
       </Fragment>
       <Fragment>
         <button onClick={getScreen}>getScreen</button>
