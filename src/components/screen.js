@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState, useRef } from "react"; //useEffect, useState
-import ReactPlayer from "react-player";
-import Player from "video-react";
+// import ReactPlayer from "react-player";
+// import Player from "video-react";
 
 const Screen = ({ socket }) => {
   const [source, setSource] = useState(false);
@@ -115,6 +115,7 @@ const Screen = ({ socket }) => {
       noiseSuppression: true,
     },
   };
+
   const getCam = () => {
     if (source) stop();
     if (hasGetUserMedia()) {

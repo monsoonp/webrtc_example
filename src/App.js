@@ -7,6 +7,11 @@ import Screen from "./components/screen";
 // package.json
 // mac - HTTPS=true
 // windows - set HTTPS=true&&
+
+// yarn react-start
+// yarn start
+// yarn build
+
 function App() {
   // const socket = socketClient("/");
 
