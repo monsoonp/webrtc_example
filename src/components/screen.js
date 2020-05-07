@@ -102,7 +102,19 @@ const Screen = ({ socket }) => {
       .then(async (sources) => {
         // for (const src of sources) {
         for (const [idx, src] of sources.entries()) {
-          console.log(src);
+          console.log(
+            `%c${
+              Object.entries(src)
+                .reduce((a, e) => {
+                  if (typeof e[1] != "function") {
+                    a += `"${e[0]}" : "${e[1]}", `;
+                  }
+                  return a;
+                }, "`{")
+                .slice(1, -2) + "}`"
+            }`,
+            "color:black;font-family:system-ui;-webkit-text-stroke: 1px orange;font-weight:bold"
+          );
           // if (src.name === "Electron" || src.name === "Entire Screen") {
           if (idx === count) {
             try {
