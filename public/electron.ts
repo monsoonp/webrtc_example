@@ -2,6 +2,7 @@
 import { app, BrowserWindow } from "electron";
 import * as isDev from "electron-is-dev";
 import * as path from "path";
+require("./server");
 
 // 1. Gabage Collection이 일어나지 않도록 함수 밖에 선언함.
 let mainWindow: BrowserWindow;

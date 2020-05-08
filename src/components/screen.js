@@ -98,7 +98,7 @@ const Screen = ({ socket }) => {
   };
   const getDesktop = (cb) => {
     desktopCapturer
-      .getSources({ types: ["window", "screen"] })
+      .getSources({ types: ["screen", "window"] }) //"window", "screen", "tap"
       .then(async (sources) => {
         // for (const src of sources) {
         for (const [idx, src] of sources.entries()) {
@@ -122,11 +122,13 @@ const Screen = ({ socket }) => {
                 video: {
                   mandatory: {
                     chromeMediaSource: "desktop",
-                    chromeMediaSourceId: src.id,
-                    minWidth: 1280,
+                    chromeMediaSourceId: src.id, //
+                    minWidth: 1280, // size
                     maxWidth: 1280,
                     minHeight: 720,
                     maxHeight: 720,
+                    maxFrameRate: 0.5, // fps
+                    minFrameRate: 0.2, //
                   },
                 },
                 audio: false,
