@@ -1,15 +1,18 @@
 const express = require("express");
-const app = express();
 
-app.use(express.json());
+const createServer = (app) => {
+  const server = express();
+  server.use(express.json());
 
-app.get("/test", (req, res) => {
-  res.writeHead(200, { "Content-Type": "text/json;charset=utf-8" });
-  res.end('{"testcode":"200", "text":"Electorn Test~"}');
-});
+  server.get("/test", (req, res) => {
+    // res.writeHead(200, { "Content-Type": "text/json;charset=utf-8" });
+    // res.end('{"testcode":"200", "text":"Electorn Test~"}');
+    res.send(app.respondToClient(req));
+  });
 
-const server = app.listen(5500, () => {
-  console.log("server: ", server.address());
-});
+  server.listen(5500, () => {
+    console.log("server: ", server.address());
+  });
+};
 
-module.exports = app;
+export default createServer;

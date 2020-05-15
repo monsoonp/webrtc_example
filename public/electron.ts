@@ -2,7 +2,9 @@
 import { app, BrowserWindow } from "electron";
 import * as isDev from "electron-is-dev";
 import * as path from "path";
-require("./server");
+// require("./server");
+import createServer from "./server";
+const server = createServer(app);
 
 // 1. Gabage Collection이 일어나지 않도록 함수 밖에 선언함.
 let mainWindow: BrowserWindow;
@@ -10,15 +12,14 @@ let mainWindow: BrowserWindow;
 //https
 // app.commandLine.appendSwitch("ignore-certificate-errors", "true");
 // process.env.ELECTRON_DISABLE_SECURITY_WARNING = "1";
-
 function createWindow() {
   mainWindow = new BrowserWindow({
     // 이것들은 제가 사용하는 설정이니 각자 알아서 설정 하십시오.
     // alwaysOnTop: true,
     movable: true,
     center: true,
-    fullscreen: true,
-    // kiosk: !isDev,
+    // fullscreen: true,
+    kiosk: !isDev,
     resizable: true,
     // transparent:true,
     webPreferences: {

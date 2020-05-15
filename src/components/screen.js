@@ -1,16 +1,52 @@
 import React, { Fragment, useEffect, useState, useRef } from "react"; //useEffect, useState
+import P2P from "socket.io-p2p";
+import io from "socket.io-client";
+
 // import { getDesktop } from "./desktopCapture";
-const electron = window.require("electron");
-const desktopCapturer = electron.desktopCapturer;
+// const electron = window.require("electron");
+// const desktopCapturer = electron.desktopCapturer;
 
 // import ReactPlayer from "react-player";
 // import Player from "video-react";
 
-const Screen = ({ socket }) => {
+const Screen = () => {
   const [source, setSource] = useState(false);
-  const [location, setLocation] = useState(false);
   const [count, setCount] = useState(0);
+  const [sock, setSock] = useState(false);
   const videoTag = useRef();
+
+  const socketConnect = () => {
+    const socket = io("//127.0.0.1:5000");
+    setSock(socket);
+    if (socket) {
+      console.log("socket connection:", socket);
+      socket.on("stream", (data) => {
+        setSource(data);
+        videoTag.current.srcObject = data;
+      });
+    }
+    // const p2p = new P2P(socket);
+    // var p2psocket = new P2P(socket, opts)
+    /*
+    const opts = { numClients: 10 }; // connect up to 10 clients at a time
+    const p2p = new P2P(socket, opts, () => {
+      console.log("We all speak WebRTC now");
+    });
+    if (p2p) {
+      p2p.on("peer-msg", function (data) {
+        console.log("From a peer %s", data);
+      });
+      p2p.on("go-private", function () {
+        p2p.upgrade(); // upgrade to peerConnection
+      });
+      p2p.on("stream", (data) => {
+        setSource(data);
+        videoTag.current.srcObject = data;
+      });
+      
+    }
+    */
+  };
 
   const getScreenStream = async (callback) => {
     if (!!navigator.getDisplayMedia) {
@@ -45,7 +81,11 @@ const Screen = ({ socket }) => {
   };
   const getScreenId = (error, sourceId, screen_constraints) => {
     navigator.getUserMedia =
-      navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+      navigator.mozGetUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.getUserMedia ||
+      navigator.msgGetUserMedia;
+
     navigator.getUserMedia(
       screen_constraints,
       (stream) => {
@@ -89,13 +129,16 @@ const Screen = ({ socket }) => {
         audio: displayConstraints.audio,
       })
       .catch(async () => {
-        getDesktop(cb);
+        // getDesktop(cb);
+        return getScreenStream(cb);
         // alert("Couldn't get Screen");
       });
     // const videoTrack = stream.getVideoTracks();
     // console.log(videoTrack);
     cb(stream);
   };
+  /*
+  // electron desktopCapturer
   const getDesktop = (cb) => {
     desktopCapturer
       .getSources({ types: ["screen", "window"] }) //"window", "screen", "tap"
@@ -127,8 +170,8 @@ const Screen = ({ socket }) => {
                     maxWidth: 1280,
                     minHeight: 720,
                     maxHeight: 720,
-                    maxFrameRate: 0.5, // fps
-                    minFrameRate: 0.2, //
+                    maxFrameRate: 60, // fps
+                    minFrameRate: 1, //
                   },
                 },
                 audio: false,
@@ -145,20 +188,24 @@ const Screen = ({ socket }) => {
         }
       });
   };
+  */
   const getScreen = () => {
     if (source) stop();
-
-    //  getScreenStream((stream) => {
-    getDisplay((stream) => {
-      // const video = document.querySelector("video");
-      // video.srcObject = stream;
-      console.log("screen stream:", stream);
-      if (stream) {
-        setSource(stream);
-        videoTag.current.srcObject = stream;
-      }
-      // setSource(true);
-    });
+    try {
+      // getScreenStream((stream) => {
+      getDisplay((stream) => {
+        // const video = document.querySelector("video");
+        // video.srcObject = stream;
+        console.log("screen stream:", stream);
+        if (stream) {
+          setSource(stream);
+          videoTag.current.srcObject = stream;
+        }
+        // setSource(true);
+      });
+    } catch {
+      alert("화면을 가져올 수 없습니다.");
+    }
   };
   const stop = () => {
     // videoTag.current.srcObject = null;
@@ -204,7 +251,14 @@ const Screen = ({ socket }) => {
       alert("카메라를 찾을 수 없습니다.");
     }
   };
+  const getLocation = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      console.log(position);
+      // setLocation(position);
+    });
+  };
   useEffect(() => {
+    socketConnect();
     if (source) {
       source.getVideoTracks()[0].onended = (e) => {
         //oninactive , onended
@@ -213,28 +267,10 @@ const Screen = ({ socket }) => {
         alert("화면 공유를 중지하였습니다.");
       };
     }
-    if (socket) {
-      console.log("socket connection:", socket);
-      socket.on("screen", (data) => {
-        setSource(data);
-        videoTag.current.srcObject = data;
-      });
-    }
-    if (!location) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        console.log(position);
-        setLocation(position);
-      });
-    }
   });
   return (
     <div>
       <Fragment>
-        {!!location && (
-          <p>
-            ({location.coords.latitude}, {location.coords.longitude})
-          </p>
-        )}
         <input
           onChange={(e) => {
             setCount(parseInt(e.target.value));
@@ -264,6 +300,7 @@ const Screen = ({ socket }) => {
             autoPlay={true}
             playsInline
             controls
+            preload="metadata"
             height={!!source ? "50%" : "0%"}
             width={!!source ? "100%" : "0%"}
             style={{
